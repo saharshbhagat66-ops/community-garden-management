@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GreenRoots — Community Garden Management</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🌱</div>
+        <div>
+          <h1>GreenRoots</h1>
+          <span>Community Garden</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-btn active" data-section="dashboard">📊 Admin Dashboard</button>
+        <button class="nav-btn" data-section="plots">🪴 Garden Plots</button>
+        <button class="nav-btn" data-section="members">👥 Members</button>
+        <button class="nav-btn" data-section="tasks">✅ Task Schedule</button>
+        <button class="nav-btn" data-section="logs">💧 Watering &amp; Logs</button>
+        <button class="nav-btn" data-section="harvest">🍅 Harvest Records</button>
+        <button class="nav-btn" data-section="volunteers">⏱️ Volunteer Hours</button>
+        <button class="nav-btn" data-section="announcements">📢 Announcements</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-outline small full-width" id="exportDataBtn">Export Data (JSON)</button>
+        <button class="btn-danger small full-width" id="resetDataBtn">Reset Demo Data</button>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">☰</button>
+          <h2 id="pageTitle">Admin Dashboard</h2>
+        </div>
+        <div class="topbar-right">
+          <span class="badge-live">● Live Local Storage</span>
+          <span class="team-tag">Team: The Boys</span>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- 1. ADMIN DASHBOARD -->
+        <section id="section-dashboard" class="view-section active">
+          <div class="kpi-grid" id="dashboardKpis"></div>
+
+          <div class="two-col">
+            <div class="card">
+              <div class="card-header">
+                <h3>Plot Status Breakdown</h3>
+              </div>
+              <div id="plotChart" class="chart-box"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3>Top Volunteers (Hours)</h3>
+              </div>
+              <div id="volunteerLeaderboard" class="chart-box"></div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="card">
+              <div class="card-header">
+                <h3>Upcoming Tasks</h3>
+                <button class="btn-link" onclick="switchSection('tasks')">View all →</button>
+              </div>
+              <div id="dashboardTasks"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3>Latest Announcements</h3>
+                <button class="btn-link" onclick="switchSection('announcements')">View all →</button>
+              </div>
+              <div id="dashboardAnnouncements"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. GARDEN / PLOT MANAGEMENT -->
+        <section id="section-plots" class="view-section">
+          <div class="section-toolbar">
+            <div class="filter-group">
+              <label for="plotStatusFilter">Filter Status:</label>
+              <select id="plotStatusFilter">
+                <option value="All">All Plots</option>
+                <option value="Occupied">Occupied</option>
+                <option value="Available">Available</option>
+                <option value="Maintenance">Maintenance</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Add / Assign Garden Plot</h3></div>
+            <form id="plotForm" class="form-grid">
+              <input type="text" id="plotCode" placeholder="Plot Code (e.g., C1)" required />
+              <input type="text" id="plotCrop" placeholder="Crop / Plants (e.g., Tomatoes, Basil)" required />
+              <input type="text" id="plotAssignee" placeholder="Assigned Member (or Unassigned)" />
+              <select id="plotStatus">
+                <option value="Occupied">Occupied</option>
+                <option value="Available">Available</option>
+                <option value="Maintenance">Maintenance</option>
+              </select>
+              <input type="text" id="plotSize" placeholder="Size (e.g., 4x8 ft)" required />
+              <button type="submit" class="btn-primary">Add Plot</button>
+            </form>
+          </div>
+
+          <div class="plot-grid" id="plotsGrid"></div>
+        </section>
+
+        <!-- 3. MEMBER REGISTRATION -->
+        <section id="section-members" class="view-section">
+          <div class="card">
+            <div class="card-header"><h3>Register New Member</h3></div>
+            <form id="memberForm" class="form-grid">
+              <input type="text" id="memberName" placeholder="Full Name" required />
+              <input type="email" id="memberEmail" placeholder="Email Address" required />
+              <input type="tel" id="memberPhone" placeholder="Phone Number" required />
+              <select id="memberRole">
+                <option value="Gardener">Gardener</option>
+                <option value="Volunteer">Volunteer</option>
+                <option value="Coordinator">Coordinator</option>
+              </select>
+              <input type="text" id="memberPlot" placeholder="Assigned Plot (e.g., A1 or None)" />
+              <button type="submit" class="btn-primary">Register Member</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Registered Members</h3>
+              <input type="text" id="memberSearch" class="search-input" placeholder="Search members..." />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Plot</th>
+                    <th>Joined</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="membersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. TASK SCHEDULING -->
+        <section id="section-tasks" class="view-section">
+          <div class="card">
+            <div class="card-header"><h3>Schedule New Task</h3></div>
+            <form id="taskForm" class="form-grid">
+              <input type="text" id="taskTitle" placeholder="Task Description (e.g., Mulch Plot A2)" required />
+              <input type="text" id="taskPlot" placeholder="Plot (e.g., A2 or General)" required />
+              <input type="text" id="taskAssignee" placeholder="Assigned To" required />
+              <input type="date" id="taskDue" required />
+              <select id="taskPriority">
+                <option value="High">High Priority</option>
+                <option value="Medium" selected>Medium Priority</option>
+                <option value="Low">Low Priority</option>
+              </select>
+              <button type="submit" class="btn-primary">Add Task</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Task List</h3>
+              <select id="taskFilter">
+                <option value="All">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Task</th>
+                    <th>Plot</th>
+                    <th>Assigned To</th>
+                    <th>Due Date</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tasksTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. WATERING & MAINTENANCE LOGS -->
+        <section id="section-logs" class="view-section">
+          <div class="card">
+            <div class="card-header"><h3>Add Watering / Maintenance Log</h3></div>
+            <form id="logForm" class="form-grid">
+              <select id="logType">
+                <option value="Watering">Watering</option>
+                <option value="Weeding">Weeding</option>
+                <option value="Composting">Composting</option>
+                <option value="Pruning">Pruning</option>
+                <option value="Pest Control">Pest Control</option>
+              </select>
+              <input type="text" id="logPlot" placeholder="Plot Code (e.g., B1)" required />
+              <input type="text" id="logMember" placeholder="Logged By" required />
+              <input type="date" id="logDate" required />
+              <input type="text" id="logNotes" placeholder="Notes (e.g., 20L drip irrigation)" required />
+              <button type="submit" class="btn-primary">Save Log</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Maintenance History</h3></div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Activity</th>
+                    <th>Plot</th>
+                    <th>Performed By</th>
+                    <th>Notes</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="logsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. HARVEST RECORDS -->
+        <section id="section-harvest" class="view-section">
+          <div class="card">
+            <div class="card-header"><h3>Log Harvest Record</h3></div>
+            <form id="harvestForm" class="form-grid">
+              <input type="text" id="harvestCrop" placeholder="Crop Name (e.g., Spinach)" required />
+              <input type="number" step="0.1" min="0.1" id="harvestQty" placeholder="Quantity (kg)" required />
+              <input type="text" id="harvestPlot" placeholder="Plot (e.g., A1)" required />
+              <input type="text" id="harvestBy" placeholder="Harvested By" required />
+              <select id="harvestDest">
+                <option value="Shared with Members">Shared with Members</option>
+                <option value="Local Food Bank">Local Food Bank</option>
+                <option value="Community Market">Community Market</option>
+              </select>
+              <input type="date" id="harvestDate" required />
+              <button type="submit" class="btn-primary">Record Harvest</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Harvest Ledger</h3>
+              <span class="highlight-pill" id="totalHarvestPill">Total: 0 kg</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Crop</th>
+                    <th>Quantity (kg)</th>
+                    <th>Plot</th>
+                    <th>Harvested By</th>
+                    <th>Distribution</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="harvestTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. VOLUNTEER HOURS -->
+        <section id="section-volunteers" class="view-section">
+          <div class="card">
+            <div class="card-header"><h3>Log Volunteer Hours</h3></div>
+            <form id="volunteerForm" class="form-grid">
+              <input type="text" id="volName" placeholder="Volunteer Name" required />
+              <input type="text" id="volActivity" placeholder="Activity (e.g., Compost Turning)" required />
+              <input type="number" step="0.5" min="0.5" id="volHours" placeholder="Hours" required />
+              <input type="date" id="volDate" required />
+              <button type="submit" class="btn-primary">Log Hours</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Volunteer Timesheet</h3>
+              <span class="highlight-pill" id="totalVolunteerPill">Total: 0 hrs</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Volunteer</th>
+                    <th>Activity</th>
+                    <th>Hours</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="volunteerTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. ANNOUNCEMENTS -->
+        <section id="section-announcements" class="view-section">
+          <div class="card">
+            <div class="card-header"><h3>Post Community Announcement</h3></div>
+            <form id="announcementForm" class="form-grid">
+              <input type="text" id="annTitle" placeholder="Announcement Title" required />
+              <select id="annCategory">
+                <option value="Event">Event</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Alert">Alert</option>
+                <option value="General">General</option>
+              </select>
+              <input type="text" id="annAuthor" placeholder="Posted By" required />
+              <input type="text" id="annBody" placeholder="Announcement Details..." class="span-2" required />
+              <button type="submit" class="btn-primary">Post Notice</button>
+            </form>
+          </div>
+
+          <div class="announcements-list" id="announcementsList"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
